@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vLLM Monitor Dashboard</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="header-left">
+                <h1 class="logo">vLLM Monitor</h1>
+                <span class="version">v1.0</span>
+            </div>
+            <div class="header-center">
+                <div class="server-selector">
+                    <label for="serverSelect">Server:</label>
+                    <select id="serverSelect" class="server-dropdown">
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="status-indicator" id="connectionStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Connecting...</span>
+                </div>
+                <div class="server-info" id="serverInfo">--</div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon prompt-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-label">Prompt Tokens (24h)</span>
+                        <span class="stat-value" id="promptTokens">--</span>
+                        <span class="stat-delta" id="promptTokensHour">Last hour: --</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon completion-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-label">Completion Tokens (24h)</span>
+                        <span class="stat-value" id="completionTokens">--</span>
+                        <span class="stat-delta" id="completionTokensHour">Last hour: --</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon total-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-label">Total Tokens (24h)</span>
+                        <span class="stat-value" id="totalTokens">--</span>
+                        <span class="stat-delta" id="totalTokensHour">Last hour: --</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon requests-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-label">Total Requests (24h)</span>
+                        <span class="stat-value" id="totalRequests">--</span>
+                        <span class="stat-delta" id="requestsHour">Last hour: --</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="charts-section">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Token Usage Over Time</h3>
+                        <div class="chart-controls">
+                            <button class="time-btn active" data-hours="1">1H</button>
+                            <button class="time-btn" data-hours="6">6H</button>
+                            <button class="time-btn" data-hours="24">24H</button>
+                            <button class="time-btn" data-hours="168">7D</button>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="tokenChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Request Activity</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="requestChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section class="info-section">
+                <div class="info-card">
+                    <h3>System Status</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Service Status</span>
+                            <span class="info-value status-badge" id="serviceStatus">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Running Requests</span>
+                            <span class="info-value" id="runningRequests">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Pending Requests</span>
+                            <span class="info-value" id="pendingRequests">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">GPU Utilization</span>
+                            <span class="info-value" id="gpuUtilization">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>Model Information</h3>
+                    <div class="models-list" id="modelsList">
+                        <div class="loading">Loading models...</div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>Configuration</h3>
+                    <div class="config-list">
+                        <div class="config-item">
+                            <span class="config-label">vLLM Endpoint</span>
+                            <code class="config-value" id="vllmEndpoint">--</code>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-label">Polling Interval</span>
+                            <span class="config-value" id="pollingInterval">--</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-label">Data Retention</span>
+                            <span class="config-value" id="dataRetention">--</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="report-section">
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3>Weekly Report</h3>
+                        <button class="refresh-btn" id="refreshReport">Refresh</button>
+                    </div>
+                    <div class="report-content" id="reportContent">
+                        <div class="loading">Loading report...</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="weekly-chart-section">
+                <div class="chart-container full-width">
+                    <div class="chart-header">
+                        <h3>Daily Token Usage (Last 7 Days)</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="weeklyChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section class="metrics-section">
+                <div class="metrics-card">
+                    <h3>Raw Metrics</h3>
+                    <div class="metrics-filter">
+                        <input type="text" id="metricsFilter" placeholder="Filter metrics...">
+                    </div>
+                    <div class="metrics-table-wrapper">
+                        <table class="metrics-table">
+                            <thead>
+                                <tr>
+                                    <th>Metric Name</th>
+                                    <th>Value</th>
+                                    <th>Labels</th>
+                                </tr>
+                            </thead>
+                            <tbody id="metricsTableBody">
+                                <tr><td colspan="3" class="loading">Loading metrics...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <span>vLLM Monitor Dashboard</span>
+            <span id="lastUpdate">Last update: --</span>
+        </footer>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

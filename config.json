@@ -1,0 +1,52 @@
+{
+  "servers": [
+    {
+      "id": "server1",
+      "name": "Production Server",
+      "host": "localhost",
+      "port": 8000,
+      "api_key": "",
+      "ssl": false
+    },
+    {
+      "id": "server2",
+      "name": "Dev Server",
+      "host": "192.168.1.100",
+      "port": 8000,
+      "api_key": "",
+      "ssl": false
+    },
+    {
+      "id": "server3",
+      "name": "Test Server",
+      "host": "192.168.1.101",
+      "port": 8000,
+      "api_key": "",
+      "ssl": false
+    }
+  ],
+  "default_server": "server1",
+  "vllm": {
+    "timeout": 30,
+    "metrics_endpoint": "/metrics",
+    "health_endpoint": "/health",
+    "models_endpoint": "/v1/models"
+  },
+  "monitor": {
+    "polling_interval": 5,
+    "history_retention_hours": 168,
+    "database_path": "data/metrics.db"
+  },
+  "dashboard": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "refresh_interval": 5,
+    "chart_points": 100
+  },
+  "alerts": {
+    "enabled": false,
+    "token_rate_threshold": 10000,
+    "latency_threshold_ms": 5000,
+    "webhook_url": ""
+  }
+}
